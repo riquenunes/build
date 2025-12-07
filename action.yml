@@ -39,6 +39,10 @@ inputs:
     description: "Obfuscate the build"
     required: false
     default: "false"
+  build-obfuscate-seed:
+    description: "Seed for garble obfuscation (e.g., garbleargs -seed=...)"
+    required: false
+    default: ""
   wails-version:
     description: "Wails version to use"
     required: false
@@ -51,6 +55,10 @@ inputs:
     description: "Version of Go to use"
     required: false
     default: "1.23"
+  garble-version:
+    description: "Version of Garble to use"
+    required: false
+    default: "latest"
   node-version:
     description: "Node js version"
     required: false
@@ -141,6 +149,9 @@ runs:
         build_options=""
         if ${{ inputs.build-obfuscate == 'true' }}; then
           build_options+=' -obfuscated'
+          if [[ -n "${{ inputs.build-obfuscate-seed }}" ]]; then
+            build_options+=" -garbleargs -seed=${{ inputs.build-obfuscate-seed }}"
+          fi
         fi
         if [[ "${{ inputs.build-tags }}" != "false" ]]; then
           tags_string="${{ inputs.build-tags }}"
@@ -166,7 +177,7 @@ runs:
         go-version: ${{ inputs.go-version }}
     - name: Install Garble
       if: inputs.build-obfuscate == 'true'
-      run: go install mvdan.cc/garble@latest
+      run: go install mvdan.cc/garble@${{ inputs.garble-version }}
       shell: bash
     - run: go version
       shell: bash
